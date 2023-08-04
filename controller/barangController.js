@@ -53,4 +53,38 @@ barang.delete('/:kode', async(req,res) => {
     }
 })
 
+barang.put('/:kode', async(req, res) => {
+    const { nama, harga, deskripsi, kategori } = req.body
+    const { kode } = req.params
+    
+    const [cari] = await conn.query('SELECT namaFile FROM barang WHERE IDBarang = ?', [kode])
+
+    let namaFile = ""
+
+    if(req.files != null) {
+        const file = req.files.file
+        const ext = path.extname(file.name)    
+        namaFile = file.md5 + ext
+        const jalur = `./public/gambar/${cari[0].namaFile}`
+        
+        fs.unlinkSync(jalur)
+        
+        const path2 = `./public/gambar/${namaFile}`
+        
+        file.mv(path2)
+    } else {
+        namaFile = cari[0].namaFile
+    }
+    
+    const url = `${req.protocol}://${req.get('host')}/gambar/${namaFile}`
+
+    const [ganti] = await conn.query(`UPDATE barang SET namaBarang=?, hargaBarang=?, deskripsiBarang=?, kategoriBarang=?, url=?  WHERE IDBarang=? `, [nama, harga, deskripsi, kategori, url, kode])
+ 
+    if(ganti.affectedRows > 0) {
+        res.status(200).send({
+            'pesan' : 'berhasil diganti'
+        })
+    }
+})
+
 module.exports = barang
