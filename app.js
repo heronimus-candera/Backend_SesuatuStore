@@ -19,5 +19,5 @@ app.use(express.static('public'))
 app.use('/barang', barang)
 
 app.listen(port, (req, res) => {
-    console.log(`server jalan di ${req.protocol}://${req.get('host')}`)
+    console.log('server jalan di '+ port)
 })
